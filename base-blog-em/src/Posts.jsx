@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 
@@ -5,31 +6,22 @@ import { PostDetail } from "./PostDetail";
 const maxPostPage = 10;
 
 async function fetchPosts(pageNum) {
-  const response = await fetch(
+  const response = await axios.get(
     `https://jsonplaceholder.typicode.com/posts?_limit=10&_page=${pageNum}`
   );
-  return response.json();
+  console.log(pageNum, response.data);
+  return response.data;
 }
 
 export function Posts() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedPost, setSelectedPost] = useState(null);
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (currentPage <= maxPostPage) {
-      const nextPage = currentPage + 1;
-      queryClient.prefetchQuery(["posts", nextPage], () =>
-        fetchPosts(currentPage)
-      );
-    }
-  }, [currentPage, queryClient]);
 
   //  useQuery
   const { data, isError, isLoading, error } = useQuery(
     ["posts", currentPage],
     () => fetchPosts(currentPage),
-    { staleTime: 2000, keepPreviousData: false }
+    { staleTime: 2000 }
   );
 
   if (isLoading) return <h3>loading...</h3>;
